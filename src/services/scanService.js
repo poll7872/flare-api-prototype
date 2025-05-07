@@ -1,3 +1,5 @@
+import { generateToken } from "./authService.js";
+
 export const scanSocialMedia = async ({ nombre, apellido, username }) => {
   const token = await generateToken();
 
