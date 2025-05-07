@@ -1,5 +1,5 @@
 import Router from 'express';
-import { handleGenerateToken } from '../controllers/authController';
+import { handleGenerateToken } from '../controllers/authController.js';
 
 const router = Router();
 

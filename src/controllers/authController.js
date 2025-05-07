@@ -1,4 +1,4 @@
-import { generateToken } from "../services/authService";
+import { generateToken } from "../services/authService.js";
 
 // This function handles the generation of a token for the Flare API
 export const handleGenerateToken = async (req, res) => {
