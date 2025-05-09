@@ -1,6 +1,7 @@
 import { createAlert, createAsset } from "../services/alertService.js";
 import { scanSocialMedia } from "../services/scanService.js";
 
+//Este método escanea las redes sociales de un usuario y crea una alerta
 export const searchSocialMedia = async (req, res) => {
   try {
     const { nombre, apellido, username } = req.body;
@@ -9,14 +10,14 @@ export const searchSocialMedia = async (req, res) => {
       return res.status(400).json({ error: 'Missing required data' });
     }
 
-    //Ejecutar escaneo
+    //1. Ejecutar escaneo
     const result = await scanSocialMedia({ nombre, apellido, username });
 
-    //Crear asset 
+    //2. Crear asset 
     const assetName = `${nombre} ${apellido} @${username}`;
-    const assetId = await createAsset({ name: assetName, searchType: "social_media" });
+    const assetId = await createAsset({ name: assetName, searchType: "social_media", type: username });
 
-    //Crear alerta
+    //3. Crear alerta
     const alert = await createAlert({ assetId, name: `Alerta para ${assetName}` });
 
     res.status(200).json({ scanResult: result, alertCreated: alert });

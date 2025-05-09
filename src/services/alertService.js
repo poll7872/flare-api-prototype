@@ -1,6 +1,7 @@
-import { generateToken } from "./authService"
+import { generateToken } from "./authService.js"
 
-export const createAsset = async ({ name, searchType }) => {
+//Este método crea un asset para poder realizar la alerta
+export const createAsset = async ({ name, searchType, type }) => {
   const token = await generateToken();
 
   const response = await axios.post(
@@ -11,7 +12,7 @@ export const createAsset = async ({ name, searchType }) => {
       name,
       risks: [],
       search_types: [searchType],
-      type,
+      type: type,
     },
     {
       headers: {
@@ -24,6 +25,7 @@ export const createAsset = async ({ name, searchType }) => {
   return response.data.asset?.id; // asset_id
 };
 
+//Este método creá una alerta para un asset
 export const createAlert = async ({ assetId, name }) => {
   const token = await generateToken();
 
@@ -42,7 +44,7 @@ export const createAlert = async ({ assetId, name }) => {
     start_at: new Date().toISOString(),
     tenant_alert_channel_id: 123, // usar valor real despues
     tenant_id: 123, // usar valor real despues
-    type: "email"
+    type: "email" //Tipo de comunicación de la alerta
   };
 
   const response = await axios.post(

@@ -3,8 +3,7 @@ import { generateToken } from "./authService.js";
 export const scanSocialMedia = async ({ nombre, apellido, username }) => {
   const token = await generateToken();
 
-  const url = process.env.FLARE_API_BASE_URL
-
+  const url = `${process.env.FLARE_API_BASE_URL}/firework/v4/events/global/_search`
   const query = `${nombre} ${apellido} @${username}`;
 
   const body = {
