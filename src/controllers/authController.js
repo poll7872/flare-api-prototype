@@ -1,6 +1,6 @@
 import { generateToken } from "../services/authService.js";
 
-// Está función genera un token de acceso para la API de Flare
+// Esté controlador genera un token de acceso para el usuario (si desea)
 export const handleGenerateToken = async (req, res) => {
   try {
     const token = await generateToken();
