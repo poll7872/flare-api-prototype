@@ -1,62 +1,70 @@
-import { generateToken } from "./authService.js"
+import axios from 'axios';
+import { generateToken } from '../utils/generateToken.js';
+import { Alert } from '../models/Alert.js';
 
-//Este método crea un asset para poder realizar la alerta
-export const createAsset = async ({ name, searchType, type }) => {
-  const token = await generateToken();
+const { FLARE_API_BASE_URL, TENANT_ID, ORGANIZATION_ID } = process.env;
 
-  const response = await axios.post(
-    'https://api.flare.io/firework/v2/assets/',
-    {
-      data: {},
-      experimental_search_types: [],
-      name,
-      risks: [],
-      search_types: [searchType],
-      type: type,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      }
-    }
-  );
-
-  return response.data.asset?.id; // asset_id
-};
-
-//Este método creá una alerta para un asset
-export const createAlert = async ({ assetId, name }) => {
-  const token = await generateToken();
-
-  const body = {
-    created_at: new Date().toISOString(),
-    experimental_search_types: [],
-    feed_target_id: assetId,
-    feed_target_type: "assets/groups",
-    feed_url: "",
-    frequency: 1440, // cada 24 horas
+export const createAlertService = async ({
+    assetId,
     name,
-    organization_id: 123, // usar valor real despues
-    params: {},
-    risks: [],
-    search_types: ["social_media"],
-    start_at: new Date().toISOString(),
-    tenant_alert_channel_id: 123, // usar valor real despues
-    tenant_id: 123, // usar valor real despues
-    type: "email" //Tipo de comunicación de la alerta
-  };
+    searchTypes,
+    risks,
+    frequency,
+    type = 'email' // valor por defecto si no se pasa
+}) => {
+    try {
+        const { access_token } = await generateToken();
 
-  const response = await axios.post(
-    `https://api.flare.io/firework/v2/assets/${assetId}/alerts`,
-    body,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      }
+        const nowISOString = new Date().toISOString(); 
+
+        const payload = {
+            name: `${name}-alert`,
+            type,
+            feed_target_type: 'assets/groups',
+            feed_target_id: assetId,
+            frequency,
+            search_types: searchTypes,
+            risks,
+            params: {},
+            created_at: nowISOString,
+            start_at: nowISOString,
+            tenant_id: parseInt(TENANT_ID),
+            organization_id: parseInt(ORGANIZATION_ID),
+        };
+
+        const response = await axios.post(
+            `${FLARE_API_BASE_URL}/firework/v2/assets/${assetId}/alerts`,
+            payload,
+            {
+                headers: {
+                    Authorization: `Bearer ${access_token}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        console.log('[✅] Alerta creada en Flare:', response.data.id);
+
+        // Guardar la alerta en MongoDB
+        const savedAlert = await Alert.create({
+            flareId: response.data.id,
+            assetId: response.data.feed_target_id,
+            name: response.data.name,
+            type: response.data.type,
+            searchTypes: response.data.search_types,
+            risks: response.data.risks,
+            frequency: response.data.frequency,
+            tenantId: response.data.tenant_id,
+            organizationId: response.data.organization_id,
+            createdAt: response.data.created_at,
+            startAt: response.data.start_at,
+        });
+          
+        console.log('[✅] Alerta guardada en MongoDB:', savedAlert);
+          return savedAlert;
+        
+    } catch (error) {
+        console.error('[❌] Error al crear alerta en Flare:', error?.response?.data || error.message);
+        throw error;
     }
-  );
-
-  return response.data;
 };
