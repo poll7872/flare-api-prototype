@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { generateToken } from '../utils/generateToken.js';
-import { Identifier } from '../models/Identifier.js';
 
 const { FLARE_API_BASE_URL } = process.env;
 
